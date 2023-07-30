@@ -21,6 +21,7 @@ class LocalizationOptions {
   final String endPoint;
   final String linearGradient;
   final String radialGradient;
+  final String sweepGradient;
   final String changeColor;
 
   LocalizationOptions(this.languageCode,
@@ -29,6 +30,7 @@ class LocalizationOptions {
       this.selectColor = "Select color",
       this.linearGradient = "Linear gradient",
       this.radialGradient = "Radial gradient",
+      this.sweepGradient = "Sweep gradient",
       this.startingPoint = "Select starting point",
       this.changeColor = "Color added. Click on colored disc to change color.",
       this.endPoint = "Select end point"});
@@ -41,6 +43,7 @@ class LocalizationOptions {
         selectColor: "Sélectionnez une couleur",
         linearGradient: "Dégradé linéaire",
         radialGradient: "Dégradé axial",
+        sweepGradient: "Dégradé de balayage",
         startingPoint: "Sélectionnez le position de départ",
         changeColor: "Couleur ajoutée. Cliquez sur le disque coloré pour en changer.",
         endPoint: "Sélectionnez la position de fin"),
@@ -50,6 +53,7 @@ class LocalizationOptions {
         selectColor: "Seleccione un color",
         linearGradient: "Gradiente lineal",
         radialGradient: "Gradiente axial",
+        sweepGradient: "Barrido de degradado",
         startingPoint: "Seleccione la posición de inicio",
         changeColor: "Color añadido. Haz clic en el disco de color para cambiarlo.",
         endPoint: "Seleccionar punto final"),
@@ -59,6 +63,7 @@ class LocalizationOptions {
         selectColor: "Wählen Sie eine Farbe",
         linearGradient: "Linearer Gradient",
         radialGradient: "Axialer Gradient",
+        sweepGradient: "Farbverlauf-Sweep",
         startingPoint: "Startposition auswählen",
         changeColor: "Farbe hinzugefügt. Klicken Sie auf die farbige Scheibe, um sie zu ändern.",
         endPoint: "Endpunkt auswählen")

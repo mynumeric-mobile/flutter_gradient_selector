@@ -30,6 +30,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
   GlobalKey _sampleKey = GlobalKey();
   GlobalKey _linearKey = GlobalKey();
   GlobalKey _radialKey = GlobalKey();
+  GlobalKey _sweepKey = GlobalKey();
 
   @override
   void initState() {
@@ -42,7 +43,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      bool isRadial = gradient is RadialGradient;
+      GradientSpecification specif = GradientProperties.getType(gradient).specifications()!;
       return SingleChildScrollView(
           child: SizedBox(
         height: constraints.maxHeight,
@@ -59,7 +60,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                width: isRadial ? 80 : constraints.maxWidth,
+                width: specif.displayRadius ? 80 : constraints.maxWidth,
                 height: 80,
                 child: AlignmentPicker(
                   key: _sampleKey,
@@ -85,7 +86,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
               ),
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
-                child: isRadial
+                child: specif.displayRadius
                     ? Slider(
                         value: properties.radius,
                         onChanged: (value) {
@@ -129,7 +130,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                 key: _radialKey,
                 clipBehavior: Clip.none,
                 style: ElevatedButton.styleFrom(
-                  side: isRadial ? const BorderSide(width: 3) : null,
+                  side: gradient is RadialGradient ? const BorderSide(width: 3) : null,
                   padding: const EdgeInsets.all(1.0),
                   minimumSize: const Size(0, 0),
                 ),
@@ -146,6 +147,30 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       gradient: GradientType.radial.get(properties),
+                      //       )
+                    )),
+              ),
+              ElevatedButton(
+                key: _sweepKey,
+                clipBehavior: Clip.none,
+                style: ElevatedButton.styleFrom(
+                  side: gradient is SweepGradient ? const BorderSide(width: 3) : null,
+                  padding: const EdgeInsets.all(1.0),
+                  minimumSize: const Size(0, 0),
+                ),
+                onPressed: () {
+                  gradient = GradientType.sweep.get(properties);
+                  _explanation = localizationOptions.sweepGradient;
+                  _cornerMode = CornerMode.none;
+                  widget.onChange?.call(gradient);
+                  setState(() {});
+                },
+                child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: GradientType.sweep.get(properties),
                       //       )
                     )),
               ),
@@ -179,13 +204,14 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                 shrinkWrap: true,
                 itemCount: properties.colors.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return (index == 0 || (index == properties.colors.length - 1 && !isRadial))
+                  return (index == 0 || (index == properties.colors.length - 1 && specif.adjustEnd))
                       ? GestureDetector(
                           key: Key('GD$index'),
                           child: colorWidget(
                               index,
                               (index == 0 && _cornerMode == CornerMode.begin) ||
                                   (index == properties.colors.length - 1 && _cornerMode == CornerMode.end),
+                              specif,
                               constraints),
                           onTap: () {
                             var val = index == 0 ? CornerMode.begin : CornerMode.end;
@@ -198,7 +224,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                             setState(() {});
                           },
                         )
-                      : colorWidget(index, false, constraints);
+                      : colorWidget(index, false, specif, constraints);
                 },
                 onReorder: (int oldIndex, int newIndex) {
                   if (oldIndex < newIndex) {
@@ -219,8 +245,8 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
   ///
   /// color tile
   ///
-  colorWidget(index, selected, constraints) {
-    var alignAjustable = index == 0 || ((index == properties.colors.length - 1) && gradient is! RadialGradient);
+  colorWidget(index, selected, specif, constraints) {
+    var alignAjustable = index == 0 || ((index == properties.colors.length - 1) && specif.adjustEnd);
     return Padding(
         key: Key('$index'),
         padding: const EdgeInsets.all(3),
@@ -245,12 +271,16 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
               ),
               Expanded(
                   child: index < properties.colors.length - 1
-                      ? Slider(
-                          value: properties.stops[index],
-                          onChanged: (value) {
-                            properties.stops[index] = value;
-                            upDateGradient();
-                          })
+                      ? SliderTheme(
+                          data: SliderThemeData(
+                            overlayShape: SliderComponentShape.noThumb,
+                          ),
+                          child: Slider(
+                              value: properties.stops[index],
+                              onChanged: (value) {
+                                properties.stops[index] = value;
+                                upDateGradient();
+                              }))
                       : Container()),
               (index > 0 || properties.colors.length > 2) && index < properties.colors.length - 1
                   ? ElevatedButton(
@@ -270,15 +300,20 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                         size: 30,
                       ),
                     )
-                  : alignAjustable
-                      ? const Align(
-                          alignment: AlignmentDirectional.centerEnd,
-                          child: Padding(
-                            padding: EdgeInsets.all(10.0),
-                            child: Icon(Icons.fit_screen),
-                          ),
-                        )
-                      : Container(),
+                  : const SizedBox(
+                      width: 50,
+                    ),
+              alignAjustable
+                  ? const Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Icon(Icons.fit_screen),
+                      ),
+                    )
+                  : const SizedBox(
+                      width: 45,
+                    ),
             ],
           ),
         ));
@@ -290,6 +325,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
     _sampleKey = GlobalKey();
     _radialKey = GlobalKey();
     _linearKey = GlobalKey();
+    _sweepKey = GlobalKey();
     setState(() {});
   }
 }
@@ -307,12 +343,31 @@ extension GradientExtension on GradientType {
         return SweepGradient(colors: prop.colors, stops: prop.stops, center: prop.begin);
     }
   }
+
+  GradientSpecification? specifications() {
+    return gradientSpecificationDictionary[this];
+  }
+
+  static Map<GradientType, GradientSpecification> gradientSpecificationDictionary = {
+    GradientType.linear: GradientSpecification(),
+    GradientType.radial: GradientSpecification(adjustEnd: false, displayRadius: true),
+    GradientType.sweep: GradientSpecification(adjustEnd: false)
+  };
+}
+
+class GradientSpecification {
+  bool adjustBegin;
+  bool adjustEnd;
+  bool displayRadius;
+
+  GradientSpecification({this.adjustBegin = true, this.adjustEnd = true, this.displayRadius = false});
 }
 
 class GradientProperties {
   List<Color> colors;
   List<double> stops;
   AlignmentGeometry begin;
+  //AlignmentGeometry center;
   AlignmentGeometry end;
   double radius;
 
@@ -321,6 +376,7 @@ class GradientProperties {
     stops,
     this.begin = Alignment.centerLeft,
     this.end = Alignment.centerRight,
+    //this.center = Alignment.center,
     this.radius = 0.5,
   })  : colors = colors ??= [Colors.pink, Colors.blue],
         stops = stops ?? [0, 1];
@@ -339,13 +395,17 @@ class GradientProperties {
     return p;
   }
 
-  applyProperties(Gradient g) {
+  static GradientType getType(Gradient g) {
     GradientType type = g is LinearGradient
         ? GradientType.linear
         : g is RadialGradient
             ? GradientType.radial
             : GradientType.sweep;
 
-    return type.get(this);
+    return type;
+  }
+
+  applyProperties(Gradient g) {
+    return getType(g).get(this);
   }
 }
