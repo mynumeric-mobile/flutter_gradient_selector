@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 double _cornerDiameter = 25.0;
 
 class AlignmentPicker extends StatelessWidget {
-  AlignmentPicker({super.key, required this.decoratedChild, required this.alignment, required this.onChange});
+  AlignmentPicker({super.key, required this.decoratedChild, this.alignment, required this.onChange});
 
   final Widget decoratedChild;
-  final AlignmentGeometry alignment;
+  final AlignmentGeometry? alignment;
   final Function onChange;
 
   // late AlignmentGeometry alignment;
@@ -34,29 +34,25 @@ class AlignmentPicker extends StatelessWidget {
           left: _cornerDiameter / 2,
           child: SizedBox(height: normalizedHeight, width: normalizedWidth, child: decoratedChild),
         ),
-        for (Alignment a in allowedAlignment)
-          Positioned(
-              top: (1 + a.y) * normalizedHeight / 2,
-              left: (1 + a.x) * normalizedWidth / 2,
-              child: _SelectablePoint(
-                type: a,
-                selected: alignment == a,
-                onChange: (value) {
-                  onChange(value);
-                },
-              )),
+        if (alignment != null)
+          for (Alignment a in allowedAlignment)
+            Positioned(
+                top: (1 + a.y) * normalizedHeight / 2,
+                left: (1 + a.x) * normalizedWidth / 2,
+                child: _SelectablePoint(
+                  type: a,
+                  selected: alignment == a,
+                  onChange: (value) {
+                    onChange(value);
+                  },
+                )),
       ]);
     });
   }
 }
 
 class _SelectablePoint extends StatelessWidget {
-  const _SelectablePoint({
-    required this.type,
-    required this.selected,
-    required this.onChange,
-    super.key,
-  });
+  const _SelectablePoint({required this.type, required this.selected, required this.onChange});
 
   final Alignment type;
   final bool selected;

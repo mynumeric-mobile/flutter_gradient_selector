@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gradient_selector/flutter_gradient_selector.dart';
+import 'package:flutter_gradient_selector/helpers/localization.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,19 +40,17 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-                height: 500,
-                width: 300,
-                child: GradientSelector(
-                  gradient: LinearGradient(colors: [Colors.pink, Colors.blue]),
-                )),
-          ],
-        ),
-      ),
+      body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        return Center(
+          child: SizedBox(
+              height: constraints.maxHeight * 0.9,
+              width: constraints.maxWidth * 0.9,
+              child: const GradientSelector(
+                gradient: LinearGradient(colors: [Colors.pink, Colors.blue]),
+                lang: LocalisationCode.fr,
+              )),
+        );
+      }),
     );
   }
 }
