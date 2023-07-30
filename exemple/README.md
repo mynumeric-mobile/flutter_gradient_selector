@@ -1,16 +1,12 @@
-# exemple
+Flutter Gradient Selector allow user to create gradient on the fly
 
-A new Flutter project.
+<table><tr><td><div align="center">
+  <video  controls autoplay src="https://github.com/mynumeric-mobile/flutter_spot/assets/60822263/677de86d-3368-4e3e-af2d-d4ce50375abc" width="400" />
+</div></td><td><h2>Features</h2>
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+<li>Linear Radial and Sweep gradient support,</li>
+<li>Localization Fr, En, Es, De</li>
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+</td></tr></table>
