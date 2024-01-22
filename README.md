@@ -1,7 +1,7 @@
 Flutter Gradient Selector allow user to create gradient on the fly
 
-<table><tr><td><div align="center">
-  <video  controls autoplay src="https://github.com/mynumeric-mobile/flutter_spot/assets/60822263/677de86d-3368-4e3e-af2d-d4ce50375abc" width="400" />
+<table border="0"><tr><td><div align="center">
+  <img height=500 src="https://github.com/mynumeric-mobile/flutter_gradient_selector/assets/60822263/f472c14a-5859-4398-b154-0fbd5e0834bc" />
 </div></td><td><h2>Features</h2>
 
 
@@ -10,3 +10,7 @@ Flutter Gradient Selector allow user to create gradient on the fly
 <li>Localization Fr, En, Es, De</li>
 
 </td></tr></table>
+
+##Usage
+
+Have a look at exemple folder

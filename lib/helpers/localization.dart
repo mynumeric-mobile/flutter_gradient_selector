@@ -23,9 +23,13 @@ class LocalizationOptions {
   final String radialGradient;
   final String sweepGradient;
   final String changeColor;
+  final String gradient;
+  final String solid;
 
   LocalizationOptions(this.languageCode,
       {this.ok = "Ok",
+      this.solid = "Simple",
+      this.gradient = "Dégradé",
       this.cancel = "Cancel",
       this.selectColor = "Select color",
       this.linearGradient = "Linear gradient",
@@ -39,6 +43,8 @@ class LocalizationOptions {
     LocalisationCode.en: LocalizationOptions(LocalisationCode.en),
     LocalisationCode.fr: LocalizationOptions(LocalisationCode.fr,
         ok: "Ok",
+        solid: "Simple",
+        gradient: "Dégradé",
         cancel: "Annuler",
         selectColor: "Sélectionnez une couleur",
         linearGradient: "Dégradé linéaire",
@@ -49,6 +55,8 @@ class LocalizationOptions {
         endPoint: "Sélectionnez la position de fin"),
     LocalisationCode.es: LocalizationOptions(LocalisationCode.es,
         ok: "Ok",
+        solid: "Solid",
+        gradient: "Gradient",
         cancel: "Cancelar",
         selectColor: "Seleccione un color",
         linearGradient: "Gradiente lineal",
@@ -59,6 +67,8 @@ class LocalizationOptions {
         endPoint: "Seleccionar punto final"),
     LocalisationCode.de: LocalizationOptions(LocalisationCode.de,
         ok: "Ok",
+        solid: "Einfach",
+        gradient: "Gradient",
         cancel: "Abbrechen",
         selectColor: "Wählen Sie eine Farbe",
         linearGradient: "Linearer Gradient",

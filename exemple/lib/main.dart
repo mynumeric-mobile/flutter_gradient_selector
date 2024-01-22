@@ -45,9 +45,15 @@ class _MyHomePageState extends State<MyHomePage> {
           child: SizedBox(
               height: constraints.maxHeight * 0.9,
               width: constraints.maxWidth * 0.9,
-              child: const GradientSelector(
-                gradient: LinearGradient(colors: [Colors.pink, Colors.blue]),
+              child: GradientSelector(
+                allowChangeMode: false,
+                gradientMode: false,
+                color: const LinearGradient(colors: [Colors.green, Colors.amber]),
                 lang: LocalisationCode.fr,
+                history: const [Colors.amber, Colors.white, Colors.green],
+                onChange: (value) {
+                  var c = value;
+                },
               )),
         );
       }),

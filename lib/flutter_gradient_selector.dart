@@ -4,18 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gradient_selector/alignment_picker.dart';
 
 import 'helpers/localization.dart';
-import 'widgets/color_picker.dart';
+import 'widgets/fgs_color_picker.dart';
 
 enum CornerMode { begin, end, none }
 
 List<Color> colorHistory = [];
 
 class GradientSelector extends StatefulWidget {
-  const GradientSelector({super.key, required this.gradient, this.onChange, this.lang});
+  const GradientSelector(
+      {super.key,
+      required this.color,
+      this.onChange,
+      this.lang,
+      this.history,
+      this.gradientMode = true,
+      this.allowChangeMode = true});
 
-  final Gradient gradient;
+  final dynamic color;
   final Function? onChange;
   final LocalisationCode? lang;
+  final List<Color>? history;
+  final bool gradientMode;
+  final bool allowChangeMode;
 
   @override
   State<GradientSelector> createState() => _GradientSelectorState();
@@ -23,9 +33,11 @@ class GradientSelector extends StatefulWidget {
 
 class _GradientSelectorState extends State<GradientSelector> with TickerProviderStateMixin {
   late Gradient gradient;
+  late Color color;
   CornerMode _cornerMode = CornerMode.none;
   late GradientProperties properties;
   String _explanation = '';
+  bool solidColorMode = true;
 
   GlobalKey _sampleKey = GlobalKey();
   GlobalKey _linearKey = GlobalKey();
@@ -35,7 +47,17 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
   @override
   void initState() {
     setLocalizationOptions(widget.lang);
-    gradient = widget.gradient;
+
+    solidColorMode = !widget.gradientMode;
+
+    if (widget.color is Gradient) {
+      gradient = widget.color as Gradient;
+      color = Colors.amber;
+    } else {
+      color = widget.color as Color;
+      gradient = const LinearGradient(colors: [Colors.green, Colors.amber]);
+    }
+
     properties = GradientProperties.fromGradient(gradient);
     super.initState();
   }
@@ -45,201 +67,239 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       GradientSpecification specif = GradientProperties.getType(gradient).specifications()!;
       return SingleChildScrollView(
-          child: SizedBox(
-        height: constraints.maxHeight,
         child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, children: [
           Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 _explanation,
-                textScaleFactor: 0.8,
+                textScaler: const TextScaler.linear(0.8),
               ),
+              if (widget.allowChangeMode && !solidColorMode)
+                ElevatedButton(
+                    onPressed: () {
+                      solidColorMode = true;
+                      setState(() {});
+                    },
+                    child: Text(
+                      localizationOptions.solid,
+                    )),
+              if (widget.allowChangeMode && solidColorMode)
+                ElevatedButton(
+                    onPressed: () {
+                      solidColorMode = false;
+                      setState(() {});
+                    },
+                    child: Text(
+                      localizationOptions.gradient,
+                    ))
             ],
           ),
-          Row(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: specif.displayRadius ? 80 : constraints.maxWidth,
-                height: 80,
-                child: AlignmentPicker(
-                  key: _sampleKey,
-                  alignment: _cornerMode == CornerMode.begin
-                      ? properties.begin
-                      : _cornerMode == CornerMode.none
-                          ? null
-                          : properties.end,
+          solidColorMode
+              ? SolidColorPicker(
+                  color: color,
+                  colorHistory: widget.history,
                   onChange: (value) {
-                    if (_cornerMode == CornerMode.begin) {
-                      properties.begin = value;
-                    } else {
-                      properties.end = value;
-                    }
-                    upDateGradient();
+                    color = value;
+                    widget.onChange?.call(value);
+                    setState(() {});
                   },
-                  decoratedChild: Container(
-                      decoration: BoxDecoration(
-                    gradient: gradient,
-                    //       )
-                  )),
-                ),
-              ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                child: specif.displayRadius
-                    ? Slider(
-                        value: properties.radius,
-                        onChanged: (value) {
-                          properties.radius = value;
-                          upDateGradient();
-                        })
-                    : Container(),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                key: _linearKey,
-                clipBehavior: Clip.none,
-                style: ElevatedButton.styleFrom(
-                  side: gradient is LinearGradient ? const BorderSide(width: 3) : null,
-                  padding: const EdgeInsets.all(1.0),
-                  minimumSize: const Size(0, 0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0),
-                  ),
-                ),
-                onPressed: () {
-                  gradient = GradientType.linear.get(properties);
-                  _explanation = localizationOptions.linearGradient;
-                  _cornerMode = CornerMode.none;
-                  widget.onChange?.call(gradient);
-                  setState(() {});
-                },
-                child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      gradient: GradientType.linear.get(properties),
-                      //       )
-                    )),
-              ),
-              ElevatedButton(
-                key: _radialKey,
-                clipBehavior: Clip.none,
-                style: ElevatedButton.styleFrom(
-                  side: gradient is RadialGradient ? const BorderSide(width: 3) : null,
-                  padding: const EdgeInsets.all(1.0),
-                  minimumSize: const Size(0, 0),
-                ),
-                onPressed: () {
-                  gradient = GradientType.radial.get(properties);
-                  _explanation = localizationOptions.radialGradient;
-                  _cornerMode = CornerMode.none;
-                  widget.onChange?.call(gradient);
-                  setState(() {});
-                },
-                child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: GradientType.radial.get(properties),
-                      //       )
-                    )),
-              ),
-              ElevatedButton(
-                key: _sweepKey,
-                clipBehavior: Clip.none,
-                style: ElevatedButton.styleFrom(
-                  side: gradient is SweepGradient ? const BorderSide(width: 3) : null,
-                  padding: const EdgeInsets.all(1.0),
-                  minimumSize: const Size(0, 0),
-                ),
-                onPressed: () {
-                  gradient = GradientType.sweep.get(properties);
-                  _explanation = localizationOptions.sweepGradient;
-                  _cornerMode = CornerMode.none;
-                  widget.onChange?.call(gradient);
-                  setState(() {});
-                },
-                child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: GradientType.sweep.get(properties),
-                      //       )
-                    )),
-              ),
-              WsColorPicker(
-                color: Colors.white,
-                title: localizationOptions.selectColor,
-                onChange: (value) {
-                  var delta = (properties.stops[1] - properties.stops[0]) / 2;
+                )
+              : SizedBox(height: constraints.maxHeight, child: gradientWidget(specif, constraints))
+        ]),
+      );
+    });
+  }
 
-                  properties.colors.insert(1, value);
-                  properties.stops.insert(1, properties.stops[0] + delta);
-                  _explanation = localizationOptions.changeColor;
-                  upDateGradient();
-                },
-                child: Container(
-                  alignment: AlignmentDirectional.center,
-                  width: 30,
-                  height: 30,
-                  child: const Text(
-                    "+",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-              )
-            ],
-          ),
-          Expanded(
-            child: SizedBox(
-              width: constraints.maxWidth * 0.9,
-              child: ReorderableListView.builder(
-                shrinkWrap: true,
-                itemCount: properties.colors.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return (index == 0 || (index == properties.colors.length - 1 && specif.adjustEnd))
-                      ? GestureDetector(
-                          key: Key('GD$index'),
-                          child: colorWidget(
-                              index,
-                              (index == 0 && _cornerMode == CornerMode.begin) ||
-                                  (index == properties.colors.length - 1 && _cornerMode == CornerMode.end),
-                              specif,
-                              constraints),
-                          onTap: () {
-                            var val = index == 0 ? CornerMode.begin : CornerMode.end;
-                            _cornerMode = val == _cornerMode ? CornerMode.none : val;
-                            _explanation = val == CornerMode.none
-                                ? ""
-                                : val == CornerMode.begin
-                                    ? localizationOptions.startingPoint
-                                    : localizationOptions.endPoint;
-                            setState(() {});
-                          },
-                        )
-                      : colorWidget(index, false, specif, constraints);
-                },
-                onReorder: (int oldIndex, int newIndex) {
-                  if (oldIndex < newIndex) {
-                    newIndex -= 1;
-                  }
-                  final Color c = properties.colors.removeAt(oldIndex);
-                  properties.colors.insert(newIndex, c);
-                  upDateGradient();
-                },
-              ),
+  Column gradientWidget(GradientSpecification specif, BoxConstraints constraints) {
+    return Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, children: [
+      Row(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: specif.displayRadius ? 80 : constraints.maxWidth,
+            height: 80,
+            child: AlignmentPicker(
+              key: _sampleKey,
+              alignment: _cornerMode == CornerMode.begin
+                  ? properties.begin
+                  : _cornerMode == CornerMode.none
+                      ? null
+                      : properties.end,
+              onChange: (value) {
+                if (_cornerMode == CornerMode.begin) {
+                  properties.begin = value;
+                } else {
+                  properties.end = value;
+                }
+                upDateGradient();
+              },
+              decoratedChild: Container(
+                  decoration: BoxDecoration(
+                gradient: gradient,
+                //       )
+              )),
             ),
           ),
-        ]),
-      ));
-    });
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            child: specif.displayRadius
+                ? Slider(
+                    activeColor: Colors.grey,
+                    thumbColor: Colors.blueGrey,
+                    inactiveColor: Colors.black45,
+                    value: properties.radius,
+                    onChanged: (value) {
+                      properties.radius = value;
+                      upDateGradient();
+                    })
+                : Container(),
+          ),
+        ],
+      ),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton(
+            key: _linearKey,
+            clipBehavior: Clip.none,
+            style: ElevatedButton.styleFrom(
+              side: gradient is LinearGradient ? const BorderSide(width: 3) : null,
+              padding: const EdgeInsets.all(1.0),
+              minimumSize: const Size(0, 0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
+              ),
+            ),
+            onPressed: () {
+              gradient = GradientType.linear.get(properties);
+              _explanation = localizationOptions.linearGradient;
+              _cornerMode = CornerMode.none;
+              widget.onChange?.call(gradient);
+              setState(() {});
+            },
+            child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  gradient: GradientType.linear.get(properties),
+                  //       )
+                )),
+          ),
+          ElevatedButton(
+            key: _radialKey,
+            clipBehavior: Clip.none,
+            style: ElevatedButton.styleFrom(
+              side: gradient is RadialGradient ? const BorderSide(width: 3) : null,
+              padding: const EdgeInsets.all(1.0),
+              minimumSize: const Size(0, 0),
+            ),
+            onPressed: () {
+              gradient = GradientType.radial.get(properties);
+              _explanation = localizationOptions.radialGradient;
+              _cornerMode = CornerMode.none;
+              widget.onChange?.call(gradient);
+              setState(() {});
+            },
+            child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: GradientType.radial.get(properties),
+                  //       )
+                )),
+          ),
+          ElevatedButton(
+            key: _sweepKey,
+            clipBehavior: Clip.none,
+            style: ElevatedButton.styleFrom(
+              side: gradient is SweepGradient ? const BorderSide(width: 3) : null,
+              padding: const EdgeInsets.all(1.0),
+              minimumSize: const Size(0, 0),
+            ),
+            onPressed: () {
+              gradient = GradientType.sweep.get(properties);
+              _explanation = localizationOptions.sweepGradient;
+              _cornerMode = CornerMode.none;
+              widget.onChange?.call(gradient);
+              setState(() {});
+            },
+            child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: GradientType.sweep.get(properties),
+                  //       )
+                )),
+          ),
+          WsColorPicker(
+            color: Colors.white,
+            title: localizationOptions.selectColor,
+            onChange: (value) {
+              var delta = (properties.stops[1] - properties.stops[0]) / 2;
+
+              properties.colors.insert(1, value);
+              properties.stops.insert(1, properties.stops[0] + delta);
+              _explanation = localizationOptions.changeColor;
+              upDateGradient();
+            },
+            colorHistory: widget.history,
+            child: Container(
+              alignment: AlignmentDirectional.center,
+              width: 30,
+              height: 30,
+              child: const Text(
+                "+",
+                style: TextStyle(fontSize: 20, color: Colors.grey),
+              ),
+            ),
+          )
+        ],
+      ),
+      Expanded(
+        child: SizedBox(
+          width: constraints.maxWidth * 0.9,
+          child: ReorderableListView.builder(
+            shrinkWrap: true,
+            itemCount: properties.colors.length,
+            itemBuilder: (BuildContext context, int index) {
+              return (index == 0 || (index == properties.colors.length - 1 && specif.adjustEnd))
+                  ? GestureDetector(
+                      key: Key('GD$index'),
+                      child: colorWidget(
+                          index,
+                          (index == 0 && _cornerMode == CornerMode.begin) ||
+                              (index == properties.colors.length - 1 && _cornerMode == CornerMode.end),
+                          specif,
+                          constraints),
+                      onTap: () {
+                        var val = index == 0 ? CornerMode.begin : CornerMode.end;
+                        _cornerMode = val == _cornerMode ? CornerMode.none : val;
+                        _explanation = val == CornerMode.none
+                            ? ""
+                            : val == CornerMode.begin
+                                ? localizationOptions.startingPoint
+                                : localizationOptions.endPoint;
+                        setState(() {});
+                      },
+                    )
+                  : colorWidget(index, false, specif, constraints);
+            },
+            onReorder: (int oldIndex, int newIndex) {
+              if (oldIndex < newIndex) {
+                newIndex -= 1;
+              }
+              final Color c = properties.colors.removeAt(oldIndex);
+              properties.colors.insert(newIndex, c);
+              upDateGradient();
+            },
+          ),
+        ),
+      ),
+    ]);
   }
 
   ///
@@ -249,11 +309,11 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
     var alignAjustable = index == 0 || ((index == properties.colors.length - 1) && specif.adjustEnd);
     return Padding(
         key: Key('$index'),
-        padding: const EdgeInsets.all(3),
+        padding: const EdgeInsets.only(top: 3),
         child: Container(
-          padding: const EdgeInsets.all(2),
+          padding: const EdgeInsets.all(0),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(25),
             border: Border.all(width: 1),
             color: selected ? Theme.of(context).primaryColor.withAlpha(100) : Colors.white,
           ),
@@ -268,13 +328,16 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                   upDateGradient();
                 },
                 title: localizationOptions.selectColor,
+                colorHistory: widget.history,
               ),
               Expanded(
                   child: index < properties.colors.length - 1
                       ? SliderTheme(
                           data: SliderThemeData(
-                            overlayShape: SliderComponentShape.noThumb,
-                          ),
+                              overlayShape: SliderComponentShape.noThumb,
+                              activeTrackColor: properties.colors[index],
+                              thumbColor: Colors.blueGrey,
+                              inactiveTrackColor: Colors.black45),
                           child: Slider(
                               value: properties.stops[index],
                               onChanged: (value) {
@@ -297,6 +360,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                       },
                       child: const Icon(
                         Icons.delete_outline,
+                        color: Colors.grey,
                         size: 30,
                       ),
                     )
