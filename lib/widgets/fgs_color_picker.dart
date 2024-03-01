@@ -100,7 +100,7 @@ class _SolidColorPickerState extends State<SolidColorPicker> {
 
   @override
   Widget build(BuildContext context) {
-    var portrait = MediaQuery.of(context).orientation == Orientation.portrait;
+    //var portrait = MediaQuery.of(context).orientation == Orientation.portrait;
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.9,
       //height: portrait ? 570 : 400, //max(portrait ? 550 : 400, MediaQuery.of(context).size.height * 0.9),
