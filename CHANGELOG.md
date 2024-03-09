@@ -1,4 +1,6 @@
 ## 0.0.1
-First release
+* First release
 ## 0.1.1
-Update readme file
+* Update readme file
+## 1.0.0
+* production release
