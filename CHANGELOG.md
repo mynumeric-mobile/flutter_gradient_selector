@@ -1,3 +1,4 @@
 ## 0.0.1
-
-* TODO: Describe initial release.
+First release
+## 0.1.1
+Update readme file
