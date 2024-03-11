@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 double _cornerDiameter = 25.0;
 
+///
+/// Alignment widget
+///
 class AlignmentPicker extends StatelessWidget {
   AlignmentPicker({super.key, required this.decoratedChild, this.alignment, required this.onChange});
 

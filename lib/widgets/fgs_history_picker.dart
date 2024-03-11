@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+///
+/// FgsHistoryPicker widget
+///
 class FgsHistoryPicker extends StatelessWidget {
   const FgsHistoryPicker({super.key, this.history, this.onChange});
   final List<Color>? history;

@@ -4,7 +4,9 @@ import '../helpers/localization.dart';
 import '../helpers/popup_helper.dart';
 import 'fgs_history_picker.dart';
 
-// ignore: must_be_immutable
+///
+/// WsColorPicker widget
+///
 class WsColorPicker extends StatefulWidget {
   const WsColorPicker({super.key, required this.color, this.onChange, required this.title, this.child, this.colorHistory});
   final Color color;

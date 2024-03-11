@@ -4,3 +4,5 @@
 * Update readme file
 ## 1.0.0
 * production release
+## 1.0.1
+* format issues

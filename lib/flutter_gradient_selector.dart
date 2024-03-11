@@ -10,6 +10,9 @@ enum CornerMode { begin, end, none }
 
 List<Color> colorHistory = [];
 
+///
+/// GradientSelector widget
+///
 class GradientSelector extends StatefulWidget {
   const GradientSelector(
       {super.key,
