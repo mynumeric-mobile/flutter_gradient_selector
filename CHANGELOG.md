@@ -6,3 +6,5 @@
 * production release
 ## 1.0.1
 * format issues
+## 1.0.2
+* adding gradient serialization tool

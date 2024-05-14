@@ -463,9 +463,9 @@ class GradientProperties {
       p.radius = g.radius;
     }
 
-    var s = p.serialize();
+    // var s = p.serialize();
 
-    var ds = GradientProperties.deserialize(s);
+    // var ds = GradientProperties.deserialize(s);
 
     return p;
   }
