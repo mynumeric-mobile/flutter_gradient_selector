@@ -8,3 +8,5 @@
 * format issues
 ## 1.0.2
 * adding gradient serialization tool
+## 1.0.2
+* minor serialization bug correction
