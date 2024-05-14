@@ -508,22 +508,11 @@ class GradientProperties {
       end: getAlignment(s["end"]),
       radius: s["radius"],
       colors: colors,
-      stops: s["stops"],
+      stops: s["stops"].map<double>((e) => e).ToList(),
     );
 
     return type.get(prop);
   }
-
-  // static getGradientType(value) {
-  //   switch (value) {
-  //     case "LinearGradient":
-  //       return GradientType.LinearGradient;
-  //     case "RadialGradient":
-  //       return GradientType.RadialGradient;
-  //     case "SweepGradient":
-  //       return GradientType.SweepGradient;
-  //   }
-  // }
 
   static getAlignment(value) {
     switch (value) {
