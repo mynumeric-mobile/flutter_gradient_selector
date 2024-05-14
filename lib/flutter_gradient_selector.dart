@@ -176,7 +176,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
               ),
             ),
             onPressed: () {
-              gradient = GradientType.linear.get(properties);
+              gradient = GradientType.LinearGradient.get(properties);
               _explanation = localizationOptions.linearGradient;
               _cornerMode = CornerMode.none;
               widget.onChange?.call(gradient);
@@ -186,7 +186,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                 width: 30,
                 height: 30,
                 decoration: BoxDecoration(
-                  gradient: GradientType.linear.get(properties),
+                  gradient: GradientType.LinearGradient.get(properties),
                   //       )
                 )),
           ),
@@ -199,7 +199,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
               minimumSize: const Size(0, 0),
             ),
             onPressed: () {
-              gradient = GradientType.radial.get(properties);
+              gradient = GradientType.RadialGradient.get(properties);
               _explanation = localizationOptions.radialGradient;
               _cornerMode = CornerMode.none;
               widget.onChange?.call(gradient);
@@ -210,7 +210,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                 height: 30,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  gradient: GradientType.radial.get(properties),
+                  gradient: GradientType.RadialGradient.get(properties),
                   //       )
                 )),
           ),
@@ -223,7 +223,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
               minimumSize: const Size(0, 0),
             ),
             onPressed: () {
-              gradient = GradientType.sweep.get(properties);
+              gradient = GradientType.SweepGradient.get(properties);
               _explanation = localizationOptions.sweepGradient;
               _cornerMode = CornerMode.none;
               widget.onChange?.call(gradient);
@@ -234,7 +234,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                 height: 30,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  gradient: GradientType.sweep.get(properties),
+                  gradient: GradientType.SweepGradient.get(properties),
                   //       )
                 )),
           ),
@@ -397,16 +397,17 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
   }
 }
 
-enum GradientType { linear, radial, sweep }
+// ignore: constant_identifier_names
+enum GradientType { LinearGradient, RadialGradient, SweepGradient }
 
 extension GradientExtension on GradientType {
   Gradient get(GradientProperties prop) {
     switch (this) {
-      case GradientType.linear:
+      case GradientType.LinearGradient:
         return LinearGradient(colors: prop.colors, stops: prop.stops, begin: prop.begin, end: prop.end);
-      case GradientType.radial:
+      case GradientType.RadialGradient:
         return RadialGradient(colors: prop.colors, stops: prop.stops, center: prop.begin, radius: prop.radius);
-      case GradientType.sweep:
+      case GradientType.SweepGradient:
         return SweepGradient(colors: prop.colors, stops: prop.stops, center: prop.begin);
     }
   }
@@ -416,9 +417,9 @@ extension GradientExtension on GradientType {
   }
 
   static Map<GradientType, GradientSpecification> gradientSpecificationDictionary = {
-    GradientType.linear: GradientSpecification(),
-    GradientType.radial: GradientSpecification(adjustEnd: false, displayRadius: true),
-    GradientType.sweep: GradientSpecification(adjustEnd: false)
+    GradientType.LinearGradient: GradientSpecification(),
+    GradientType.RadialGradient: GradientSpecification(adjustEnd: false, displayRadius: true),
+    GradientType.SweepGradient: GradientSpecification(adjustEnd: false)
   };
 }
 
@@ -437,6 +438,7 @@ class GradientProperties {
   //AlignmentGeometry center;
   AlignmentGeometry end;
   double radius;
+  String? typeName;
 
   GradientProperties({
     colors,
@@ -451,6 +453,8 @@ class GradientProperties {
   static fromGradient(Gradient g) {
     var p = GradientProperties(colors: List<Color>.from(g.colors), stops: g.stops);
 
+    p.typeName = g.runtimeType.toString();
+
     if (g is LinearGradient) {
       p.begin = g.begin;
       p.end = g.end;
@@ -459,20 +463,88 @@ class GradientProperties {
       p.radius = g.radius;
     }
 
+    var s = p.serialize();
+
+    var ds = GradientProperties.deserialize(s);
+
     return p;
   }
 
   static GradientType getType(Gradient g) {
     GradientType type = g is LinearGradient
-        ? GradientType.linear
+        ? GradientType.LinearGradient
         : g is RadialGradient
-            ? GradientType.radial
-            : GradientType.sweep;
+            ? GradientType.RadialGradient
+            : GradientType.SweepGradient;
 
     return type;
   }
 
   applyProperties(Gradient g) {
     return getType(g).get(this);
+  }
+
+  Map<String, dynamic> serialize() {
+    return {
+      "type": typeName,
+      "begin": contract(begin),
+      "end": contract(end),
+      "radius": radius,
+      "colors": colors.map((c) => c.toString().split('(0x')[1].split(')')[0]).toList(),
+      "stops": stops,
+    };
+  }
+
+  String contract(dynamic v) {
+    return v.toString().substring(v.runtimeType.toString().length + 1);
+  }
+
+  static deserialize(Map<String, dynamic> s) {
+    var type = GradientType.values.firstWhere((e) => e.name == s["type"]);
+    List<Color> colors = s["colors"].map<Color>((c) => Color(int.parse(c, radix: 16))).toList();
+
+    var prop = GradientProperties(
+      begin: getAlignment(s["begin"]),
+      end: getAlignment(s["end"]),
+      radius: s["radius"],
+      colors: colors,
+      stops: s["stops"],
+    );
+
+    return type.get(prop);
+  }
+
+  // static getGradientType(value) {
+  //   switch (value) {
+  //     case "LinearGradient":
+  //       return GradientType.LinearGradient;
+  //     case "RadialGradient":
+  //       return GradientType.RadialGradient;
+  //     case "SweepGradient":
+  //       return GradientType.SweepGradient;
+  //   }
+  // }
+
+  static getAlignment(value) {
+    switch (value) {
+      case "bottomCenter":
+        return Alignment.bottomCenter;
+      case "bottomLeft":
+        return Alignment.bottomLeft;
+      case "bottomRight":
+        return Alignment.bottomRight;
+      case "center":
+        return Alignment.center;
+      case "centerLeft":
+        return Alignment.centerLeft;
+      case "centerRight":
+        return Alignment.centerRight;
+      case "topCenter":
+        return Alignment.topCenter;
+      case "topLeft":
+        return Alignment.topLeft;
+      case "topRight":
+        return Alignment.topRight;
+    }
   }
 }

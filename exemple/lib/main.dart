@@ -46,8 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
               height: constraints.maxHeight * 0.9,
               width: constraints.maxWidth * 0.9,
               child: GradientSelector(
-                allowChangeMode: false,
-                gradientMode: false,
+                allowChangeMode: true,
+                gradientMode: true,
                 color: const LinearGradient(colors: [Colors.green, Colors.amber]),
                 lang: LocalisationCode.fr,
                 history: const [Colors.amber, Colors.white, Colors.green],
