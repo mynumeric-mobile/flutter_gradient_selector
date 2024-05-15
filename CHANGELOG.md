@@ -12,3 +12,5 @@
 * minor serialization bug correction
 ## 1.0.4
 * display improvment change
+## 1.0.5
+* resolve dart type name problem
