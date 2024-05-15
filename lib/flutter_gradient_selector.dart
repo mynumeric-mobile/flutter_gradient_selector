@@ -1,6 +1,7 @@
 library flutter_gradient_selector;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gradient_selector/alignment_picker.dart';
 
 import 'helpers/localization.dart';
@@ -75,9 +76,11 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                _explanation,
-                textScaler: const TextScaler.linear(0.8),
+              Expanded(
+                child: Text(
+                  _explanation,
+                  textScaler: const TextScaler.linear(0.8),
+                ),
               ),
               if (widget.allowChangeMode && !solidColorMode)
                 ElevatedButton(
@@ -190,6 +193,9 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                   //       )
                 )),
           ),
+          const SizedBox(
+            width: 5,
+          ),
           ElevatedButton(
             key: _radialKey,
             clipBehavior: Clip.none,
@@ -214,6 +220,9 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                   //       )
                 )),
           ),
+          const SizedBox(
+            width: 5,
+          ),
           ElevatedButton(
             key: _sweepKey,
             clipBehavior: Clip.none,
@@ -237,6 +246,9 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                   gradient: GradientType.SweepGradient.get(properties),
                   //       )
                 )),
+          ),
+          const SizedBox(
+            width: 5,
           ),
           WsColorPicker(
             color: Colors.white,
@@ -324,14 +336,17 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              WsColorPicker(
-                color: properties.colors[index],
-                onChange: (value) {
-                  properties.colors[index] = value;
-                  upDateGradient();
-                },
-                title: localizationOptions.selectColor,
-                colorHistory: widget.history,
+              Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: WsColorPicker(
+                  color: properties.colors[index],
+                  onChange: (value) {
+                    properties.colors[index] = value;
+                    upDateGradient();
+                  },
+                  title: localizationOptions.selectColor,
+                  colorHistory: widget.history,
+                ),
               ),
               Expanded(
                   child: index < properties.colors.length - 1
@@ -438,7 +453,7 @@ class GradientProperties {
   //AlignmentGeometry center;
   AlignmentGeometry end;
   double radius;
-  String? typeName;
+  int? typeIndex;
 
   GradientProperties({
     colors,
@@ -453,12 +468,14 @@ class GradientProperties {
   static fromGradient(Gradient g) {
     var p = GradientProperties(colors: List<Color>.from(g.colors), stops: g.stops);
 
-    p.typeName = g.runtimeType.toString();
+    p.typeIndex = p.typeIndex = GradientType.SweepGradient.index;
 
     if (g is LinearGradient) {
+      p.typeIndex = GradientType.LinearGradient.index;
       p.begin = g.begin;
       p.end = g.end;
     } else if (g is RadialGradient) {
+      p.typeIndex = GradientType.RadialGradient.index;
       p.begin = g.center;
       p.radius = g.radius;
     }
@@ -486,7 +503,7 @@ class GradientProperties {
 
   Map<String, dynamic> serialize() {
     return {
-      "type": typeName,
+      "type": typeIndex,
       "begin": contract(begin),
       "end": contract(end),
       "radius": radius,
@@ -496,11 +513,12 @@ class GradientProperties {
   }
 
   String contract(dynamic v) {
-    return v.toString().substring(v.runtimeType.toString().length + 1);
+    //return v.toString().substring(v.runtimeType.toString().length + 1);
+    return v.toString().split('.')[1];
   }
 
   static deserialize(Map<String, dynamic> s) {
-    var type = GradientType.values.firstWhere((e) => e.name == s["type"]);
+    var type = GradientType.values[s["type"]];
     List<Color> colors = s["colors"].map<Color>((c) => Color(int.parse(c, radix: 16))).toList();
     List<double> stops = s["stops"].map<double>((e) => e as double).toList();
 
