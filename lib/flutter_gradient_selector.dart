@@ -520,8 +520,10 @@ class GradientProperties {
   static deserialize(Map<String, dynamic> s) {
     var type = GradientType.values[s["type"]];
     List<Color> colors = s["colors"].map<Color>((c) => Color(int.parse(c, radix: 16))).toList();
-    List<double> stops = s["stops"].map<double>((e) => e as double).toList();
-
+    List<double> stops = [];
+    for (num v in s["stops"]) {
+      stops.add(v.toDouble());
+    }
     var prop = GradientProperties(
       begin: getAlignment(s["begin"]),
       end: getAlignment(s["end"]),
