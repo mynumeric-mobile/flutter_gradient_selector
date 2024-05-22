@@ -527,7 +527,7 @@ class GradientProperties {
     var prop = GradientProperties(
       begin: getAlignment(s["begin"]),
       end: getAlignment(s["end"]),
-      radius: s["radius"],
+      radius: s["radius"].toDouble(),
       colors: colors,
       stops: stops,
     );

@@ -16,3 +16,5 @@
 * resolve dart type name problem
 ## 1.0.6
 * small improvment
+## 1.0.7
+* small improvment
