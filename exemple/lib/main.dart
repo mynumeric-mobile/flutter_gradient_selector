@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 lang: LocalisationCode.fr,
                 history: const [Colors.amber, Colors.white, Colors.green],
                 onChange: (value) {
-                  var c = value;
+                  //var c = value;
                 },
               )),
         );

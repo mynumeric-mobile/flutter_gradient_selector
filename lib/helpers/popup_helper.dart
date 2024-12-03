@@ -65,7 +65,7 @@ class PopupHelper {
       contentPadding: const EdgeInsets.all(4.0),
       actionsPadding: const EdgeInsets.all(8.0),
       insetPadding: const EdgeInsets.all(8.0),
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       title: titleWidget ??
           (title != null
               ? Container(

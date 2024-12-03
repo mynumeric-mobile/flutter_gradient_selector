@@ -18,3 +18,7 @@
 * small improvment
 ## 1.0.7
 * small improvment
+## 1.0.8
+* small color improvment
+## 1.0.9
+* add it's own color serialization extension to correct flutter 3.24 problem

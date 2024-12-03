@@ -1,7 +1,5 @@
-library flutter_gradient_selector;
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_gradient_selector/alignment_picker.dart';
 
 import 'helpers/localization.dart';
@@ -330,7 +328,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             border: Border.all(width: 1),
-            color: selected ? Theme.of(context).primaryColor.withAlpha(100) : Colors.white,
+            color: selected ? Theme.of(context).primaryColor.withAlpha(200) : Theme.of(context).primaryColor,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -378,7 +376,7 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                       },
                       child: const Icon(
                         Icons.delete_outline,
-                        color: Colors.grey,
+                        //color: Theme.of(context).colorScheme.onPrimary,
                         size: 30,
                       ),
                     )
@@ -386,16 +384,22 @@ class _GradientSelectorState extends State<GradientSelector> with TickerProvider
                       width: 50,
                     ),
               alignAjustable
-                  ? const Align(
+                  ? Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Icon(Icons.fit_screen),
+                        padding: const EdgeInsets.all(10.0),
+                        child: Icon(
+                          Icons.fit_screen,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     )
                   : const SizedBox(
                       width: 45,
                     ),
+              const SizedBox(
+                width: 45,
+              ),
             ],
           ),
         ));
@@ -507,7 +511,7 @@ class GradientProperties {
       "begin": contract(begin),
       "end": contract(end),
       "radius": radius,
-      "colors": colors.map((c) => c.toString().split('(0x')[1].split(')')[0]).toList(),
+      "colors": colors.map((c) => c.colorToString()).toList(), //.split('(0x')[1].split(')')[0]).toList(),
       "stops": stops,
     };
   }
@@ -556,5 +560,11 @@ class GradientProperties {
       case "topRight":
         return Alignment.topRight;
     }
+  }
+}
+
+extension ColorExtension on Color {
+  String colorToString() {
+    return value.toRadixString(16).padLeft(8, '0');
   }
 }
